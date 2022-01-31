@@ -3,6 +3,7 @@ import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 import { fetchCoins } from "../api";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -87,6 +88,11 @@ const Coins = () => {
   }, []); */
   return (
     <Container>
+      <HelmetProvider>
+        <Helmet>
+          <title>Coin</title>
+        </Helmet>
+      </HelmetProvider>
       <Header>
         <Title>Coin</Title>
       </Header>

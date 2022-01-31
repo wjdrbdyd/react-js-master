@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import { useQuery } from "react-query";
 import { useLocation, useParams } from "react-router";
 import { Routes, Route, Link, useMatch } from "react-router-dom";
@@ -92,10 +92,6 @@ const Tab = styled.span<{ isActive: boolean }>`
   }
 `;
 
-interface RouteState {
-  state: { name: string };
-}
-
 interface InfoData {
   id: string;
   name: string;
@@ -151,8 +147,14 @@ interface TickersData {
     };
   };
 }
+interface RouteState {
+  state: { name: string };
+}
+type IParams = {
+  coinId: string;
+};
 const Coin = () => {
-  const { coinId } = useParams();
+  const { coinId } = useParams() as IParams;
   const { state } = useLocation() as RouteState;
   const priceMatch = useMatch("/:coinId/price");
   const chartMatch = useMatch("/:coinId/chart");
@@ -161,7 +163,9 @@ const Coin = () => {
     () => fetchCoinInfo(coinId)
   );
   const { isLoading: tickersLoading, data: tickersData } =
-    useQuery<TickersData>(["tickers", coinId], () => fetchCoinTickers(coinId));
+    useQuery<TickersData>(["tickers", coinId], () => fetchCoinTickers(coinId), {
+      refetchInterval: 5000,
+    });
   // const [loading, setLoading] = useState(true);
   // const [info, setInfo] = useState<InfoData>();
   // const [priceInfo, setPriceInfo] = useState<TickersData>();
@@ -183,6 +187,19 @@ const Coin = () => {
   const loading = infoLoading || tickersLoading;
   return (
     <Container>
+      <HelmetProvider>
+        <Helmet>
+          <link
+            id="favicon"
+            rel="icon"
+            href={`https://cryptoicon-api.vercel.app/api/icon/${infoData?.symbol.toLowerCase()}`}
+            type="image/x-icon"
+          />
+          <title>
+            {state?.name ? state.name : loading ? "Loading.." : infoData?.name}
+          </title>
+        </Helmet>
+      </HelmetProvider>
       <Header>
         <Link to={"/"}>
           <i className="fas fa-arrow-circle-left"></i>
@@ -207,8 +224,8 @@ const Coin = () => {
               <span>{infoData?.symbol}</span>
             </OverviewItem>
             <OverviewItem>
-              <span>Open Source:</span>
-              <span>{infoData?.open_source ? "Yes" : "No"}</span>
+              <span>Price:</span>
+              <span>${tickersData?.quotes.USD.price}</span>
             </OverviewItem>
           </Overview>
           <Description>{infoData?.description}</Description>
@@ -233,7 +250,7 @@ const Coin = () => {
           </Tabs>
           <Routes>
             <Route path={`price`} element={<Price />} />
-            <Route path={`chart`} element={<Chart />} />
+            <Route path={`chart`} element={<Chart coinId={coinId} />} />
           </Routes>
         </>
       )}
