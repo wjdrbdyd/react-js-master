@@ -153,7 +153,8 @@ interface RouteState {
 type IParams = {
   coinId: string;
 };
-const Coin = () => {
+interface ICoinProps {}
+const Coin = ({}: ICoinProps) => {
   const { coinId } = useParams() as IParams;
   const { state } = useLocation() as RouteState;
   const priceMatch = useMatch("/:coinId/price");
@@ -189,12 +190,6 @@ const Coin = () => {
     <Container>
       <HelmetProvider>
         <Helmet>
-          <link
-            id="favicon"
-            rel="icon"
-            href={`https://cryptoicon-api.vercel.app/api/icon/${infoData?.symbol.toLowerCase()}`}
-            type="image/x-icon"
-          />
           <title>
             {state?.name ? state.name : loading ? "Loading.." : infoData?.name}
           </title>
